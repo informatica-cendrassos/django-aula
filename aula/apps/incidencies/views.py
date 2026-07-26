@@ -595,7 +595,7 @@ def posaExpulsio(request):
         "formset.html",
         {
             "formset": formset,
-            "head": "Recullir Expulsió (Pas 1/2)",
+            "head": "Recollir Falta greu (Pas 1/2)",
         },
     )
 
@@ -674,14 +674,14 @@ def posaExpulsioW2(request, pk):
                 usuari=user,
                 l4=l4,
                 impersonated_from=request.user if request.user != user else None,
-                text="""Recullir expulsió d'alumne {0}. Professor que expulsa: {1}""".format(
+                text="""Recollir falta greu d'alumne {0}. Professor que l'aplica: {1}""".format(
                     expulsio.alumne, expulsio.professor
                 ),
             )
 
             expulsio_despres_de_posar(expulsio)
             url = "/missatgeria/elMeuMur/"
-            messages.info(request, "L'expulsió ha estat anotada")
+            messages.info(request, "La falta greu ha estat anotada")
             return HttpResponseRedirect(url)
 
     else:
@@ -711,7 +711,7 @@ def posaExpulsioW2(request, pk):
         {
             "form": formExpulsio,
             "infoForm": infoForm,
-            "head": "Recullir Expulsió (Pas 2/2)",
+            "head": "Recollir Falta greu (Pas 2/2)",
         },
     )
 
@@ -753,9 +753,12 @@ def editaExpulsio(request, pk):
         ("Responsable preferent", resps["respPre"]),
         ("Responsable (altre)", resps["respAlt"]),
         ("Altres telèfons", expulsio.alumne.get_telefons()),
-        ("Professor que expulsa", expulsio.professor if expulsio.professor else "N/A"),
         (
-            "Professor que recull expulsió",
+            "Professor que aplica la falta greu",
+            expulsio.professor if expulsio.professor else "N/A",
+        ),
+        (
+            "Professor que recull la falta greu",
             expulsio.professor_recull if expulsio.professor_recull else "N/A",
         ),
     ]
@@ -779,6 +782,9 @@ def editaExpulsio(request, pk):
 
     widgets = {"moment_comunicacio_a_tutors": DateTimeTextImput()}
     editaExpulsioFormF = modelform_factory(Expulsio, fields=fields, widgets=widgets)
+    editaExpulsioFormF.base_fields["tutor_contactat_per_l_expulsio"].label = (
+        "Tutor contactat per la falta greu"
+    )
     # editaExpulsioFormF.base_fields['moment_comunicacio_a_tutors'].widget = forms.DateTimeInput(attrs={'class':'datepickerT'} )
 
     try:
@@ -791,8 +797,8 @@ def editaExpulsio(request, pk):
         formExpulsio = editaExpulsioFormF(data=request.POST, instance=expulsio)
         can_delete = ckbxForm(
             data=request.POST,
-            label="Esborrar expulsió",
-            help_text="""Marca aquesta casella per esborrar aquesta expulsió""",
+            label="Esborrar falta greu",
+            help_text="""Marca aquesta casella per esborrar aquesta falta greu""",
         )
 
         if formExpulsio.is_valid() and can_delete.is_valid():
@@ -809,7 +815,7 @@ def editaExpulsio(request, pk):
                         impersonated_from=(
                             request.user if request.user != user else None
                         ),
-                        text="""Esborrada expulsió d'alumne {0}.""".format(
+                        text="""Esborrada falta greu d'alumne {0}.""".format(
                             expulsio.alumne
                         ),
                     )
@@ -827,7 +833,7 @@ def editaExpulsio(request, pk):
                     usuari=user,
                     l4=l4,
                     impersonated_from=request.user if request.user != user else None,
-                    text="""Editada expulsió d'alumne {0}.""".format(expulsio.alumne),
+                    text="""Editada falta greu d'alumne {0}.""".format(expulsio.alumne),
                 )
             if not hiHaErrors:
                 url = "/incidencies/llistaIncidenciesProfessional/"
@@ -837,8 +843,8 @@ def editaExpulsio(request, pk):
         formExpulsio = editaExpulsioFormF(instance=expulsio)
         can_delete = ckbxForm(
             data=request.POST,
-            label="Esborrar expulsió:",
-            help_text="""Marca aquesta cassella per esborrar aquesta expulsió""",
+            label="Esborrar falta greu:",
+            help_text="""Marca aquesta cassella per esborrar aquesta falta greu""",
         )
 
     formExpulsio.infoForm = infoForm
@@ -861,7 +867,7 @@ def editaExpulsio(request, pk):
         {
             "formset": formset,
             "infoForm": infoForm,
-            "head": "Expulsió",
+            "head": "Falta greu",
         },
     )
 
@@ -897,9 +903,11 @@ def posaExpulsioPerAcumulacio(request, pk):
     if not te_permis:
         raise Http404()
 
-    # -ja ha generat l'expulsió---
+    # -ja ha generat la falta greu---
     if incidencia.provoca_expulsio:
-        messages.warning(request, "Aquesta incidència ja havia generat una expulsió")
+        messages.warning(
+            request, "Aquesta incidència ja havia generat una falta greu"
+        )
         url_next = "/incidencies/editaExpulsio/{0}/".format(
             incidencia.provoca_expulsio.pk
         )
@@ -929,13 +937,13 @@ def posaExpulsioPerAcumulacio(request, pk):
         if te_3_incidencies_mateix_professor:
             incidencies = incidencies_mateix_professor
 
-    # -- Passem a fer l'expulsió
+    # -- Passem a fer la falta greu
     podem_fer_expulsio = (
         te_3_incidencies_gestionades_pel_tutor or te_3_incidencies_mateix_professor
     )
 
     if not podem_fer_expulsio:
-        messages.warning(request, "No podem fer expulsió.")
+        messages.warning(request, "No podem generar falta greu.")
         return HttpResponseRedirect(url_next_default)
 
     alumne = incidencia.alumne
@@ -952,7 +960,7 @@ def posaExpulsioPerAcumulacio(request, pk):
         if te_3_incidencies_gestionades_pel_tutor
         else ""
     )
-    motiu_san = """Expulsió per acumulació d'incidències: {0} {1}""".format(
+    motiu_san = """Falta greu per acumulació d'incidències: {0} {1}""".format(
         str_incidencies, gestionada_pel_tutor_txt
     )
 
@@ -974,7 +982,7 @@ def posaExpulsioPerAcumulacio(request, pk):
             usuari=user,
             l4=l4,
             impersonated_from=request.user if request.user != user else None,
-            text="""Creada expulsió d'alumne {0} per acumulació d'incidències.""".format(
+            text="""Creada falta greu d'alumne {0} per acumulació d'incidències.""".format(
                 expulsio.alumne
             ),
         )
@@ -982,7 +990,7 @@ def posaExpulsioPerAcumulacio(request, pk):
         expulsio_despres_de_posar(expulsio)
         incidencies.update(es_vigent=False, provoca_expulsio=expulsio)
         missatge = (
-            """Generada expulsió per acumulació d'incidències. Alumne/a: {0} """.format(
+            """Generada falta greu per acumulació d'incidències. Alumne/a: {0} """.format(
                 expulsio.alumne
             )
         )
@@ -1015,7 +1023,7 @@ def llistaIncidenciesProfessional(request):
     if user != professor.getUser():
         return HttpResponseRedirect("/")
 
-    # Expulsions pendents:
+    # Faltes greus pendents:
     expulsionsPendentsTramitar = [
         expulsio
         for expulsio in professor.expulsio_set.exclude(tramitacio_finalitzada=True)
@@ -1023,7 +1031,7 @@ def llistaIncidenciesProfessional(request):
 
     expulsionsPendentsPerAcumulacio = []
 
-    # alumne -> incidencies i expulsions
+    # alumne -> incidencies i faltes greus
     alumnes = {}
     for incidencia in professional.incidencia_set.all():
         alumne_str = unicode(incidencia.alumne)
@@ -1307,12 +1315,12 @@ def sancio(request, pk):
     try:
         tipus = TipusSancio.objects.all()[0]
     except IndexError:
-        tipus, _ = TipusSancio.objects.get_or_create(tipus="Expulsió del Centre")
+        tipus, _ = TipusSancio.objects.get_or_create(tipus="Falta greu del Centre")
 
     primeraFranja = FranjaHoraria.objects.all()[0]
     darreraFranja = FranjaHoraria.objects.reverse()[0]
 
-    # expulsions:
+    # faltes greus:
     expulsions = alumne.expulsio_set.filter(es_vigent=True).exclude(estat="ES")
 
     str_expulsions = ", ".join(
@@ -1322,7 +1330,7 @@ def sancio(request, pk):
         ]
     )
     str_expulsions = (
-        """Acumulació d'expulsions: {0}""".format(str_expulsions)
+        """Acumulació de faltes greus: {0}""".format(str_expulsions)
         if str_expulsions
         else ""
     )
@@ -1347,7 +1355,7 @@ def sancio(request, pk):
         else ""
     )
 
-    # expulsions + incidències
+    # faltes greus + incidències
     comentaris_cap_d_estudis = " ".join([str_expulsions, str_incidencies])
 
     url_next = (
@@ -1391,7 +1399,7 @@ def sancio(request, pk):
             {"head": "Error al crear sanció per acumulació.", "msgs": resultat},
         )
     else:
-        # assigno les expulsions a aquesta sancio
+        # assigno les faltes greus a aquesta sancio
         expulsions.update(es_vigent=False, provoca_sancio=sancio)
 
         # assigno les incidències a aquesta sancio
@@ -1455,7 +1463,7 @@ def sancions(request, s="nom"):
 
     capcelera = tools.classebuida()
     capcelera.amplade = 9
-    capcelera.contingut = "Expulsions Relacionades"
+    capcelera.contingut = "Faltes greus relacionades"
     taula.capceleres.append(capcelera)
 
     capcelera = tools.classebuida()
@@ -1511,7 +1519,7 @@ def sancions(request, s="nom"):
 
         filera.append(camp)
 
-        # -Expulsions relacionades--------------------------------------------
+        # -Faltes greus relacionades--------------------------------------------
         camp = tools.classebuida()
         camp.multipleContingut = [
             (
@@ -1936,7 +1944,7 @@ def esborrarSancio(request, pk):
     sancio.credentials = credentials
 
     try:
-        # esborrar totes les expulsions i incidències relacionades:
+        # esborrar totes les faltes greus i incidències relacionades:
         _ = (
             apps.get_model("incidencies", "Expulsio")
             .objects.filter(provoca_sancio=sancio)
@@ -1960,7 +1968,7 @@ def esborrarSancio(request, pk):
             for x in v:
                 messages.error(request, x)
     except ProtectedError:
-        messages.error(request, "Aquesta sanció té expulsions relacionades.")
+        messages.error(request, "Aquesta sanció té faltes greus relacionades.")
 
     url = "/incidencies/sancions/"
     return HttpResponseRedirect(url)

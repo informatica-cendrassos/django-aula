@@ -804,6 +804,8 @@ def enviaOneTimePasswdAlumne(alumne, email, force=False):
             "i us preguntarà quina contrasenya voleu. Com a mesura suplementària de seguretat us demanarà també alguna altra dada.",
             "Recordeu usuari i contrasenya per futures connexions al portal de relació amb famílies.",
             "  ",
+            "Una vegada fets els pasos anteriors, si ho dessitgeu, podeu utilitzar el nom d'usuari i la contrasenya a l'aplicació per a mòbil. Aquesta aplicació la podeu descarregar aquí (Android): {0}) ".format(settings.URL_APP_ANDROID_DJANGO_AULA),
+            "  ",
             "Cordialment,",
             "  ",
             settings.NOM_CENTRE,

@@ -407,7 +407,7 @@ def dadesRelacioFamilies(request):
                 Sancio,
             ),
             (
-                "expulsió(ns)",
+                "falta(es) greu(s)",
                 Expulsio,
             ),
             (
@@ -1254,7 +1254,7 @@ def elMeuInforme(request, pk=None):
         taula = tools.classebuida()
         taula.codi = nTaula
         nTaula += 1
-        taula.tabTitle = "Expulsions {0}".format(pintaNoves(expulsionsNoves.count()))
+        taula.tabTitle = "Faltes greus {0}".format(pintaNoves(expulsionsNoves.count()))
 
         taula.titol = tools.classebuida()
         taula.titol.contingut = ""

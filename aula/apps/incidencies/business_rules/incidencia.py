@@ -175,7 +175,7 @@ def incidencia_despres_de_posar(instance):
     # Lògica de negoci:
     if not instance.tipus.es_informativa:
         if settings.CUSTOM_INCIDENCIES_PROVOQUEN_EXPULSIO:
-            # Si aquest alumne ja té tres incidències cal expulsar-lo --> Envio missatge al professor.
+            # Si aquest alumne ja té tres incidències cal generar falta greu --> Envio missatge al professor.
             Incidencia = apps.get_model("incidencies", "Incidencia")
             nIncidenciesAlumneProfessor = Incidencia.objects.filter(
                 es_vigent=True,
@@ -209,7 +209,7 @@ def incidencia_despres_de_posar(instance):
             instance.gestionada_pel_tutor
             and settings.CUSTOM_INCIDENCIES_PROVOQUEN_EXPULSIO
         ):
-            # Si aquest alumne ja té tres incidències cal expulsar-lo --> Envio missatge al tutor.
+            # Si aquest alumne ja té tres incidències cal generar falta greu --> Envio missatge al tutor.
             Incidencia = apps.get_model("incidencies", "Incidencia")
             nIncidenciesAlumneProfessor = Incidencia.objects.filter(
                 es_vigent=True,

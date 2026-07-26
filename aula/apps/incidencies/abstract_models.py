@@ -70,7 +70,7 @@ class AbstractSancio(models.Model):
         help_text="Primera hora de sanció",
         on_delete=models.CASCADE,
     )
-    data_fi = models.DateField(help_text="Darrer dia d'expulsió")
+    data_fi = models.DateField(help_text="Darrer dia de falta greu")
     franja_fi = models.ForeignKey(
         "horaris.FranjaHoraria",
         related_name="hora_fi_sancio",
@@ -164,14 +164,14 @@ class AbstractExpulsio(models.Model):
     professor_recull = models.ForeignKey(
         "usuaris.Professor",
         db_index=True,
-        help_text="Professor que recull l'expulsió",
+        help_text="Professor que recull la falta greu",
         related_name="expulsions_recollides",
         on_delete=models.CASCADE,
     )
     professor = models.ForeignKey(
         "usuaris.Professor",
         db_index=True,
-        help_text="Professor que expulsa",
+        help_text="Professor que aplica la falta greu",
         blank=True,
         null=True,
         on_delete=models.CASCADE,
@@ -182,33 +182,33 @@ class AbstractExpulsio(models.Model):
     alumne = models.ForeignKey(
         "alumnes.Alumne",
         db_index=True,
-        help_text="Alumne al qual s'expulsa",
+        help_text="Alumne al qual s'aplica la falta greu",
         on_delete=models.CASCADE,
     )
 
     # si no és expulsio d'aula cal dia i franja:
     dia_expulsio = models.DateField(
-        blank=True, help_text="Dia en que l'alumne ha estat expulsat"
+        blank=True, help_text="Dia en que l'alumne ha rebut la falta greu"
     )
     franja_expulsio = models.ForeignKey(
         "horaris.FranjaHoraria",
-        help_text="Franja en que l'alumne ha estat expulsat",
+        help_text="Franja en que s'ha registrat la falta greu",
         on_delete=models.CASCADE,
     )
 
     motiu = models.TextField(
-        help_text="Motiu de l'expulsió. Aquesta informació la rebran els pares. No posar dades metges ni de salut."
+        help_text="Motiu de la falta greu. Aquesta informació la rebran els pares. No posar dades metges ni de salut."
     )
     moment_comunicacio_a_tutors = models.DateTimeField(
         null=True,
         blank=True,
-        help_text="Moment en que aquesta expulsió ha estat comunicada als tutors",
+        help_text="Moment en que aquesta falta greu ha estat comunicada als tutors",
     )
     tutor_contactat_per_l_expulsio = models.CharField(
         max_length=250, blank=True, help_text="Familiars o tutors legals contactats"
     )
     tramitacio_finalitzada = models.BooleanField(
-        help_text="Marca aquesta cassella quan hagis finalitzat tota la tramitació de l'expulsió. Un cop tramitada no es pot esborrar ni modificar.",
+        help_text="Marca aquesta cassella quan hagis finalitzat tota la tramitació de la falta greu. Un cop tramitada no es pot esborrar ni modificar.",
         default=False,
     )
     comentaris_cap_d_estudis = models.TextField(
@@ -231,8 +231,8 @@ class AbstractExpulsio(models.Model):
 
     class Meta:
         abstract = True
-        verbose_name = "Expulsió"
-        verbose_name_plural = "Expulsions"
+        verbose_name = "Falta greu"
+        verbose_name_plural = "Faltes greus"
 
     def es_expulsio_d_aula(self):
         return self.control_assistencia is not None
@@ -241,15 +241,15 @@ class AbstractExpulsio(models.Model):
         return self.motiu[:100] if self.motiu else "Motiu no informat."
 
     def __str__(self):
-        return """El professor {0} ha expulsat l'alumne {1} el dia {2}.""".format(
+        return """El professor {0} ha registrat una falta greu a l'alumne {1} el dia {2}.""".format(
             self.professor,
             self.alumne,
             self.dia_expulsio,
         )
 
     def longUnicode(self):
-        return """El professor {0} ha expulsat l'alumne {1} 
-                el dia {2} a la franja horària {3}. (expulsió
+        return """El professor {0} ha registrat una falta greu a l'alumne {1} 
+            el dia {2} a la franja horària {3}. (falta greu
                 recollida pel professor {4})""".format(
             self.professor,
             self.alumne,

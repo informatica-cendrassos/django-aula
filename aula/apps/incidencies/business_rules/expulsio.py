@@ -53,12 +53,12 @@ def expulsio_clean(instance):
 
     if instance.instanceDB is not None and instance.instanceDB.tramitacio_finalitzada:
         errors.setdefault("tramitacio_finalitzada", []).append(
-            "Aquesta expulsió ja ha estat tramitada. No es pot modificar."
+            "Aquesta falta greu ja ha estat tramitada. No es pot modificar."
         )
 
     if instance.estat == "AS" and instance.professor is None:
         errors.setdefault("professor", []).append(
-            "Falten Dades: professor que expulsa."
+            "Falten Dades: professor que aplica la falta greu."
         )
 
     # comprovar que hi ha dia i franja
@@ -71,7 +71,7 @@ def expulsio_clean(instance):
     # si tramitacio_finalitzada cal que hi hagi professor informat
     if instance.tramitacio_finalitzada and instance.professor_id is None:
         errors.setdefault("professor", []).append(
-            "Falten Dades: professor que expulsa."
+            "Falten Dades: professor que aplica la falta greu."
         )
 
     # si tramitacio_finalitzada cal que hi hagi tutor contactat
@@ -96,7 +96,7 @@ def expulsio_clean(instance):
             "Comprova la data de contacte."
         )
 
-    # Comprovació que és propietari de l'expulsió: ull, en el procés d'assignació pot estar sense propietari.
+    # Comprovació que és propietari de la falta greu: ull, en el procés d'assignació pot estar sense propietari.
     estat_superior_a_ES = instance.estat != "ES" and (
         instance.instanceDB.estat != "ES" if instance.instanceDB else True
     )
@@ -105,7 +105,7 @@ def expulsio_clean(instance):
     )
     if estat_superior_a_ES and not correspon_usuari:
         errors[NON_FIELD_ERRORS] = [
-            """Aquesta expulsió està gestionada per un altre professor. Necessites accés de Nivell 4 (UAT) per modificar-la."""
+            """Aquesta falta greu està gestionada per un altre professor. Necessites accés de Nivell 4 (UAT) per modificar-la."""
         ]
 
     if len(errors) > 0:
@@ -149,7 +149,7 @@ def expulsio_pre_delete(sender, instance, **kwargs):
     else:
         errors = {}
         if user:
-            errors[NON_FIELD_ERRORS] = ["""No es poden esborrar expulsions."""]
+            errors[NON_FIELD_ERRORS] = ["""No es poden esborrar faltes greus."""]
 
         if len(errors) > 0:
             raise ValidationError(errors)
@@ -171,7 +171,7 @@ def expulsio_despres_de_posar(instance):
         )
         msg.envia_a_usuari(instance.professor_recull.getUser(), "PI")
 
-    # missatge pel professor que expulsa:
+    # missatge pel professor que aplica la falta greu:
     missatge = CAL_TRAMITAR_EXPULSIO
     tipus_de_missatge = tipusMissatge(missatge)
     msg = Missatge(
@@ -182,7 +182,7 @@ def expulsio_despres_de_posar(instance):
     )
     msg.envia_a_usuari(instance.professor.getUser(), "VI")
 
-    # missatge pels professors que tenen aquest alumne a l'aula (exepte el professor que expulsa):
+    # missatge pels professors que tenen aquest alumne a l'aula (exepte el professor que aplica la falta greu):
     msg = Missatge(
         remitent=professor_recull.getUser(),
         text_missatge=unicode(instance),

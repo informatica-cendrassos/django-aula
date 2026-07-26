@@ -292,7 +292,7 @@ def calcula_menu(user, path, sessioImpersonada, request):
                             None,
                         ),
                         (
-                            "Recull Expulsió",
+                            "Recull Falta Greu",
                             "aula__incidencies__posa_expulsio",
                             pr,
                             None,
