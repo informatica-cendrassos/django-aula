@@ -12,6 +12,12 @@ from aula.utils.tools import unicode
 
 
 class AbstractImpartir(models.Model):
+    ESTAT_NETEJA_AULA_CHOICES = (
+        ("N", "Aula neta"),
+        ("A", "Aula acceptable"),
+        ("B", "Aula bruta"),
+    )
+
     horari = models.ForeignKey(
         "horaris.Horari", db_index=True, on_delete=models.CASCADE
     )
@@ -32,6 +38,13 @@ class AbstractImpartir(models.Model):
     )
     dia_impartir = models.DateField(db_index=True)
     dia_passa_llista = models.DateTimeField(null=True, blank=True)
+    estat_neteja_aula = models.CharField(
+        max_length=1,
+        choices=ESTAT_NETEJA_AULA_CHOICES,
+        null=True,
+        blank=True,
+        default=None,
+    )
     comentariImpartir = models.TextField(null=False, blank=True, default="")
     pot_no_tenir_alumnes = models.BooleanField(default=False)
     reserva = models.ForeignKey(

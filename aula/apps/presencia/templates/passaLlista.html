@@ -30,6 +30,105 @@
         background-color: #eea236;
         border-color: #ec971f;
       }
+
+      .cleanliness-selector {
+        margin: 12px 0 18px 0;
+      }
+
+      .cleanliness-options {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .cleanliness-option {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        color: #fff;
+      }
+
+      .cleanliness-option:hover,
+      .cleanliness-option:focus {
+        color: #fff;
+        outline: none;
+      }
+
+      .cleanliness-option.active {
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.18);
+      }
+
+      .cleanliness-option.face-happy {
+        background-color: #2b9d3d;
+      }
+
+      .cleanliness-option.face-neutral {
+        background-color: #f0ad4e;
+      }
+
+      .cleanliness-option.face-angry {
+        background-color: #d9534f;
+      }
+
+      .cara-neteja {
+        position: relative;
+        width: 26px;
+        height: 26px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+      }
+
+      .cara-neteja:before,
+      .cara-neteja:after {
+        content: "";
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background-color: #fff;
+        border-radius: 50%;
+        top: 7px;
+      }
+
+      .cara-neteja:before {
+        left: 6px;
+      }
+
+      .cara-neteja:after {
+        right: 6px;
+      }
+
+      .cara-neteja .boca {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 13px;
+      }
+
+      .cara-neteja-contenta .boca {
+        top: 13px;
+        height: 6px;
+        border-bottom: 2px solid #fff;
+        border-radius: 0 0 10px 10px;
+      }
+
+      .cara-neteja-neutral .boca {
+        top: 16px;
+        height: 0;
+        border-top: 2px solid #fff;
+      }
+
+      .cara-neteja-bruta .boca {
+        top: 15px;
+        height: 6px;
+        border-top: 2px solid #fff;
+        border-radius: 10px 10px 0 0;
+      }
+
     </style>
     
     <script type="text/javascript">
@@ -53,7 +152,39 @@
           {%  endfor %}
       }
 
+      function garanteixCampNeteja() {
+        var form = $("form").first();
+        if (form.length && !form.find("#id_estat_neteja_aula").length) {
+          form.prepend('<input type="hidden" name="estat_neteja_aula" id="id_estat_neteja_aula" value="">');
+        }
+      }
+
+      function estableixSeleccioNeteja(value) {
+        $("#id_estat_neteja_aula").val(value);
+        $(".cleanliness-option").removeClass("active");
+        $('.cleanliness-option[data-value="' + value + '"]').addClass("active");
+        $("#clean-status-error").hide();
+      }
+
       $(document).ready(function(){
+          garanteixCampNeteja();
+
+          var selectedStatus = "{{ estat_neteja_aula_seleccionat|default_if_none:'' }}";
+          if (selectedStatus) {
+            estableixSeleccioNeteja(selectedStatus);
+          }
+
+          $(".cleanliness-option").on("click", function(){
+            estableixSeleccioNeteja($(this).data("value"));
+          });
+
+          $("form").on("submit", function(e){
+            if (!$("#id_estat_neteja_aula").val()) {
+              e.preventDefault();
+              $("#clean-status-error").show();
+            }
+          });
+
           tutor();
         });
 
@@ -185,6 +316,24 @@
         </div>
         {% endif %}
         
+        <div class="cleanliness-selector">
+          <strong>Estat inicial de l'aula (neteja, ordre,...)</strong>
+          <div class="cleanliness-options" role="group" aria-label="Estat de neteja de l'aula">
+            <button type="button" class="btn cleanliness-option face-happy" data-value="N" title="Aula neta">
+              <span class="cara-neteja cara-neteja-contenta"><span class="boca"></span></span>
+            </button>
+            <button type="button" class="btn cleanliness-option face-neutral" data-value="A" title="Aula acceptable">
+              <span class="cara-neteja cara-neteja-neutral"><span class="boca"></span></span>
+            </button>
+            <button type="button" class="btn cleanliness-option face-angry" data-value="B" title="Aula bruta">
+              <span class="cara-neteja cara-neteja-bruta"><span class="boca"></span></span>
+            </button>
+          </div>
+          <div id="clean-status-error" class="alert alert-danger" style="display:none; margin-top:10px;">
+            Cal seleccionar una cara per indicar l'estat de neteja de l'aula.
+          </div>
+        </div>
+
       </div>
     	
     	<div class="col-sm-4 hidden-xs">

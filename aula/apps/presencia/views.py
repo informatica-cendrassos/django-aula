@@ -390,6 +390,19 @@ def passaLlista(request, pk):
         hiHaRetard = False
         form0 = forms.Form()
         formset.append(form0)
+
+        estat_neteja_aula = request.POST.get("estat_neteja_aula", "").strip()
+        valors_neteja_valids = [
+            codi for codi, _ in Impartir.ESTAT_NETEJA_AULA_CHOICES
+        ]
+        if estat_neteja_aula not in valors_neteja_valids:
+            totBe = False
+            if form0._errors is None:
+                form0._errors = ErrorDict()
+            form0._errors.setdefault(NON_FIELD_ERRORS, []).append(
+                "Cal indicar l'estat de neteja de l'aula abans d'enviar la llista."
+            )
+
         for control_a in impartir.controlassistencia_set.order_by(
             *settings.CUSTOM_ORDER_PRESENCIA
         ):  # .order_by( 'alumne__grup', 'alumne' )
@@ -436,6 +449,7 @@ def passaLlista(request, pk):
             # algun control d'assistència s'ha desat. Desem també el model Impartir.
             impartir.dia_passa_llista = datetime.now()
             impartir.professor_passa_llista = User2Professor(request.user)
+            impartir.estat_neteja_aula = estat_neteja_aula
             impartir.currentUser = user
 
             try:
@@ -537,6 +551,11 @@ def passaLlista(request, pk):
             "els_meus_tutorats": els_meus_tutorats,
             "oneline": True,
             "aruco_ctx": aruco_ctx,
+            "estat_neteja_aula_seleccionat": (
+                request.POST.get("estat_neteja_aula", impartir.estat_neteja_aula)
+                if request.method == "POST"
+                else impartir.estat_neteja_aula
+            ),
         },
     )
 
