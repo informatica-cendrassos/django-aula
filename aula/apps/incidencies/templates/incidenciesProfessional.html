@@ -15,7 +15,7 @@
         {% if expulsionsPendentsTramitarBooelan %}
 
             <div class="col-sm-8 col-xs-12">
-                  <span class="glyphicon glyphicon-exclamation-sign"> </span> <strong>Expulsions pendents de tramitació</strong>
+                  <span class="glyphicon glyphicon-exclamation-sign"> </span> <strong>Faltes greus pendents de tramitació</strong>
             </div>
             {% render_table expulsionsPendentsTramitar %}
         {%  endif %}
@@ -23,7 +23,7 @@
         {% if expulsionsPendentsPerAcumulacioBooelan %}
 
             <div class="col-sm-8 col-xs-12">
-                  <span class="glyphicon glyphicon-exclamation-sign"> </span> <strong>Expulsions pendents per acumulació d'incidències</strong>
+                  <span class="glyphicon glyphicon-exclamation-sign"> </span> <strong>Faltes greus pendents per acumulació d'incidències</strong>
             </div>
             {% render_table expulsionsPendentsPerAcumulacio %}
         {%  endif %}
@@ -31,7 +31,7 @@
 
 
     <div class="col-sm-8 col-xs-12">
-        <span class="glyphicon glyphicon-exclamation-sign"> </span> <strong>Expulsions/Incidències per alumne</strong>
+        <span class="glyphicon glyphicon-exclamation-sign"> </span> <strong>Faltes greus/Incidències per alumne</strong>
     </div>
     {% for alumne_grup,taula in expulsionsIIncidenciesPerAlumne.items %}
         <div class="col-sm-8 col-xs-12">

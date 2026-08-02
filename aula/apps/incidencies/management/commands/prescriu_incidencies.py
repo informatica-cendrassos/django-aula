@@ -6,7 +6,7 @@ from aula.apps.incidencies.helpers import preescriu
 
 
 class Command(BaseCommand):
-    help = "Caduca les incidències i expulsions velles"
+    help = "Caduca les incidències i faltes greus velles"
 
     preescriu()
 

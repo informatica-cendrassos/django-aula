@@ -13,13 +13,13 @@ class Table2_ExpulsioTramitar(tables.Table):
     alumne = tables.TemplateColumn(
         template_code="""<a href="/tutoria/detallTutoriaAlumne/{{record.alumne.pk}}/all/">{{ record.alumne }}</a> ( {{ record.alumne.grup  }} )""",
         order_by=("alumne.cognoms", "alumne.nom"),
-        verbose_name="Alumne Expulsat:",
+        verbose_name="Alumne amb falta greu:",
     )
 
     professor = tables.TemplateColumn(
         template_code="""{{ record.professor }}""",
         order_by=("professor.last_name", "professor.fist_name"),
-        verbose_name="Expulsat per:",
+        verbose_name="Registrada per:",
     )
 
     class Meta:
@@ -47,7 +47,7 @@ class Table2_AlertesAcumulacioExpulsions(tables.Table):
     expulsions = tables.TemplateColumn(
         template_code="""<a href="/tutoria/detallTutoriaAlumne/{{record.pk}}/incidencies">{{record.nExpulsions}}</a>""",
         order_by="-nExpulsionsSort",
-        verbose_name="Expulsions",
+        verbose_name="Faltes greus",
     )
 
     incidenciesAula = tables.TemplateColumn(
@@ -165,7 +165,7 @@ class Table2_ExpulsionsPendentsPerAcumulacio(tables.Table):
         verbose_name=" ",
         template_code="""
                                         <a style='color:red' 
-                                        href="/incidencies/posaExpulsioPerAcumulacio/{{ record.pk }}?origen={{ record.aux_origen }}"> Generar expulsió </a>
+                                        href="/incidencies/posaExpulsioPerAcumulacio/{{ record.pk }}?origen={{ record.aux_origen }}"> Generar falta greu </a>
                                         """,
         orderable=False,
     )
@@ -221,7 +221,7 @@ class Table2_ExpulsionsIIncidenciesPerAlumne(tables.Table):
                                         {% if record.dia_incidencia %}
                                             {{ record.tipus }} 
                                         {% else %}
-                                            Expulsió
+                                            Falta greu
                                         {% endif %}
                                         {% if record.es_vigent and not record.tipus.es_informativa %} <br>(vigent) {% endif %}
                                         """,

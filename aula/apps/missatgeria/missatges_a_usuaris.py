@@ -18,11 +18,11 @@ FI_PROCES_AFEGIR_ALUMNES_AMB_ERRORS = """Fi procés afegir alumnes a {0} amb err
 
 EXPULSIO_PER_ACUMULACIO_INCIDENCIES = """A l'alumne {0} ja li has posat {1} incidències en els darrers {2} dies. 
                         Segons la normativa del Centre hauries de tramitar 
-                        una expulsió per acumulació d'incidències."""
+                        una falta greu per acumulació d'incidències."""
 
 EXPULSIO_PER_ACUMULACIO_INCIDENCIES_FORA_AULA = """A l'alumne {0} li han posat {1} incidències gestionades pel tutor en els darrers {2} dies. 
                         Segons la normativa del Centre, com a tutor de l'alumne, hauries de tramitar 
-                        una expulsió per acumulació d'incidències."""
+                        una falta greu per acumulació d'incidències."""
 
 INCIDENCIA_INFORMATIVA = """Ha posat una incidència {0}a {1} ({2}) el dia {3}. 
                             El text de la incidència és: {4}"""
@@ -49,9 +49,9 @@ ACUS_REBUT_ENVIAT_A_PROFE_O_PAS = (
 
 EMAIL_A_FAMILIES = """Email a famílies enviat a {0} adreces. El text del mail és: {1}"""
 
-HAS_RECOLLIT_EXPULSIO = """ha recollit la següent expulsió: {0}"""
+HAS_RECOLLIT_EXPULSIO = """ha recollit la següent falta greu: {0}"""
 
-CAL_TRAMITAR_EXPULSIO = """Cal tramitar expulsió: {0}"""
+CAL_TRAMITAR_EXPULSIO = """Cal tramitar falta greu: {0}"""
 
 ALUMNES_DONATS_DE_BAIXA = """El següents alumnes han estat donats de baixa."""
 
@@ -125,6 +125,11 @@ PROFESSOR_RESERVA_MASSIVA = 'Se t\'ha assignat el recurs "{0}" tots els {1} des 
 
 PAGAMENT_INCORRECTE = "El pagament fet no correspon"
 
+ALUMNE_MAJOR_DEDAT = (
+    "L'alumne/a {0},  ha fet 18 anys i és major d'edat. "
+    "Cal saber si vol que els seus responsables deixin de rebre notificacions. Si vol que deixin de rebre-les, caldrà eliminar els responsables d'Esfer@"
+)
+
 MISSATGES = {
     "ADMINISTRACIO": {
         "warning": {
@@ -157,6 +162,7 @@ MISSATGES = {
             ERROR_INITDB,
             IMPORTACIO_PREINSCRIPCIO_FINALITZADA,
             ACTIVACIO_MATRICULA_FINALITZADA,
+            ALUMNE_MAJOR_DEDAT,
         }
     },
     "DISCIPLINA": {

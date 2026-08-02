@@ -18,15 +18,15 @@ class incidenciesRelacionadesForm(forms.Form):
         queryset=None,
         required=False,
         widget=forms.CheckboxSelectMultiple,
-        help_text="Tria les incidències relacionades amb aquesta expulsió.",
+        help_text="Tria les incidències relacionades amb aquesta falta greu.",
     )
 
     expulsionsRelacionades = forms.ModelMultipleChoiceField(
-        label="Expulsions Relacionades",
+        label="Faltes greus relacionades",
         queryset=None,
         required=False,
         widget=forms.CheckboxSelectMultiple,
-        help_text="Tria les expulsions relacionades amb aquesta expulsió.",
+        help_text="Tria les faltes greus relacionades amb aquesta falta greu.",
     )
 
     def __init__(self, *args, **kwargs):
@@ -104,6 +104,10 @@ class posaExpulsioForm(forms.ModelForm):
         model = Expulsio
         fields = ("dia_expulsio", "franja_expulsio")
         widgets = {"dia_expulsio": DateTextImput()}
+        labels = {
+            "dia_expulsio": "Dia de la falta greu",
+            "franja_expulsio": "Franja de la falta greu",
+        }
 
 
 # TODO: Canviar per una factoria --------------------------------------------------------<
