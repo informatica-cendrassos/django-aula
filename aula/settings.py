@@ -193,3 +193,7 @@ try:
     from .settings_local import *  # noqa: F401, F403
 except ImportError:
     from .settings_dir.demo import *  # noqa: F401, F403
+
+# Juaky - Versions de Django sense PickleSerializer raise ImportError .
+if globals().get("SESSION_SERIALIZER") == "django.contrib.sessions.serializers.PickleSerializer":
+    SESSION_SERIALIZER = "django.contrib.sessions.serializers.JSONSerializer"
