@@ -704,6 +704,10 @@ def elsMeusAlumnesAndAssignatures(request):
                 control_assistencia__impartir__horari__assignatura=assignatura,
                 tipus__es_informativa=False,
             ).count()
+            nObservacions = alumne.incidencia_set.filter(
+                control_assistencia__impartir__horari__assignatura=assignatura,
+                tipus__es_informativa=True,
+            ).count()
             nExpulsions = (
                 alumne.expulsio_set.filter(
                     # control_assistencia__impartir__horari__grup = grup,
@@ -715,11 +719,15 @@ def elsMeusAlumnesAndAssignatures(request):
             )
             camp_nIncidencies.multipleContingut = [
                 (
-                    "Incid:\xa0{0}".format(nIncidencies),
+                    "Faltes lleus:\xa0{0}".format(nIncidencies),
                     None,
                 ),
                 (
-                    "Expul:\xa0{0}".format(nExpulsions),
+                    "Faltes greus:\xa0{0}".format(nExpulsions),
+                    None,
+                ),
+                (
+                    "Observacions:\xa0{0}".format(nObservacions),
                     None,
                 ),
             ]
