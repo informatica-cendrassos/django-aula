@@ -210,8 +210,13 @@ def elsMeusAlumnesTutoratsRpt(
                 else ""
             )
             camp.multipleContingut = [
-                ("""Exp:{0}(+{1}acu)""".format(nExpulsions, nExpulsionsAcu), None),
-                ("Inc:{0}".format(nIncidencies), None),
+                (
+                    """Faltes greus:{0}(+{1}acu)""".format(
+                        nExpulsions, nExpulsionsAcu
+                    ),
+                    None,
+                ),
+                ("Faltes lleus:{0}".format(nIncidencies), None),
                 ("Obs:{0}".format(nIncidenciesInform), None),
             ]
             filera.append(camp)
