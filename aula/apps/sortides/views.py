@@ -1791,6 +1791,7 @@ def pagoOnlineBase(request, pk):
     _, responsable, alumne = getRol(user, request)
 
     pagament = get_object_or_404(Pagament, pk=pk)
+    alumne_pagament = pagament.alumne or alumne
     nexturl = request.GET.get("next")
     if not nexturl:
         nexturl = "/"
@@ -1891,7 +1892,7 @@ def pagoOnlineBase(request, pk):
         "formPagamentOnline.html",
         {
             "form": form,
-            "alumne": alumne,
+            "alumne": alumne_pagament,
             "pk": pk,
             "sortida": (
                 sortida
@@ -1902,7 +1903,7 @@ def pagoOnlineBase(request, pk):
             "preu": preu,
             "limit": data_limit_pagament,
             "pagat": pagament.pagament_realitzat,
-            "next": nexturl if alumne else '/',
+            "next": nexturl if alumne_pagament else '/',
             "origen": request.session["origen"],
         },
     )
