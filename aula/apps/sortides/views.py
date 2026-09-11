@@ -1780,6 +1780,12 @@ def pagoOnlineApi(request, pk):
     return response
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def pagoOnlineKOApi(request, pk):
+    return pagoOnlineKO(request, pk)
+
+
 def pagoOnlineBase(request, pk):
     """
     Mostra la informació del pagament i el botó per pagar o
@@ -1947,13 +1953,17 @@ def passarella(request, pk):
 
     pagament = get_object_or_404(Pagament, pk=pk)
     nexturl = request.GET.get("next") or "/"
+    url_pago = reverse(
+        (
+            "sortides__sortides__pago_on_line_api"
+            if request.session.get("origen") == "Api"
+            else "sortides__sortides__pago_on_line"
+        ),
+        kwargs={"pk": pk},
+    )
     if pagament.pagament_realitzat:
         # Ja completat, pot pasar si un usuari té diversos logins i paga des de tots.
-        return HttpResponseRedirect(
-            reverse("sortides__sortides__pago_on_line", kwargs={"pk": pk})
-            + "?next="
-            + nexturl
-        )
+        return HttpResponseRedirect(url_pago + "?next=" + nexturl)
 
     if pagament.estat == "E":
         """
@@ -2023,12 +2033,16 @@ def passarella(request, pk):
         + reverse("sortides__sortides__retorn_transaccio", kwargs={"pk": pk}),
         "Ds_Merchant_ProductDescription": titol,
         "Ds_Merchant_ConsumerLanguage": "003",
-        "DS_MERCHANT_URLOK": URL_DJANGO_AULA.replace("/", "\/")
-        + reverse("sortides__sortides__pago_on_line", kwargs={"pk": pk})
+        "DS_MERCHANT_URLOK": URL_DJANGO_AULA.replace("/", r"\/")
+        + url_pago
         + "?next="
         + nexturl,
-        "DS_MERCHANT_URLKO": URL_DJANGO_AULA.replace("/", "\/")
-        + reverse("sortides__sortides__pago_on_lineKO", kwargs={"pk": pk})
+        "DS_MERCHANT_URLKO": URL_DJANGO_AULA.replace("/", r"\/")
+        + (
+            reverse("sortides__sortides__pago_on_lineKO_api", kwargs={"pk": pk})
+            if request.session.get("origen") == "Api"
+            else reverse("sortides__sortides__pago_on_lineKO", kwargs={"pk": pk})
+        )
         + "?next="
         + nexturl,
         #'Ds_Merchant_Paymethods': 'T',
