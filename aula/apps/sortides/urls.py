@@ -269,6 +269,11 @@ urlpatterns = [
         name="sortides__sortides__pago_on_lineKO",
     ),
     re_path(
+        r"^pagoOnlineKOApi/(?P<pk>\d+)/$",
+        sortides_views.pagoOnlineKOApi,
+        name="sortides__sortides__pago_on_lineKO_api",
+    ),
+    re_path(
         r"^passarella/(?P<pk>\d+)/$",
         sortides_views.passarella,
         name="sortides__sortides__passarella",
