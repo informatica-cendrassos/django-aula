@@ -2028,7 +2028,9 @@ def passarella(request, pk):
         "DS_MERCHANT_MERCHANTCODE": codiComerç,
         "DS_MERCHANT_CURRENCY": "978",
         "DS_MERCHANT_TRANSACTIONTYPE": "0",
-        "DS_MERCHANT_TERMINAL": "001",
+        "DS_MERCHANT_TERMINAL": str(
+            getattr(settings, "CUSTOM_REDSYS_TERMINAL", "001")
+        ),
         "DS_MERCHANT_MERCHANTURL": URL_DJANGO_AULA
         + reverse("sortides__sortides__retorn_transaccio", kwargs={"pk": pk}),
         "Ds_Merchant_ProductDescription": titol,

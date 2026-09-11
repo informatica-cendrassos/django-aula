@@ -75,6 +75,7 @@ CUSTOM_SORTIDES_PAGAMENT_ONLINE = False
 CUSTOM_PREU_MINIM_SORTIDES_PAGAMENT_ONLINE = 1
 CUSTOM_SORTIDES_PAGAMENT_CAIXER = True
 CUSTOM_FORMULARI_SORTIDES_REDUIT = True
+CUSTOM_REDSYS_TERMINAL = "001"
 CUSTOM_SORTIDES_INSTRUCCIONS_PAGAMENT_ENTITAT_BANCARIA = """El pagament s'ha de realitzar als Caixers del Banc Sabadell (qualsevol targeta de qualsevol entitat funciona per realitzar el pagament, no cal tenir compte al Banc) a pagament a tercers i posar el codi de pagament: 5805."""
 CUSTOM_SORTIDES_INSTRUCCIONS_PAGAMENT_EFECTIU = (
     """El pagament s'ha de realitzar en efectiu al professor organitzador o al tutor."""
