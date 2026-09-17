@@ -45,6 +45,11 @@ urlpatterns = [
         name="aula__horari__treure_alumnes",
     ),
     re_path(
+        r"^afegeixTreuAlumnesLlistaByRalc/(?P<pk>\d+)/$",
+        presencia_views.afegeixTreuAlumnesLlistaByRalc,
+        name="aula__horari__actualitzar_alumnes_ralc",
+    ),
+    re_path(
         r"^afegeixGuardia/(?P<dia>\d+)/(?P<mes>\d+)/(?P<year>\d{4})/$",
         presencia_views.afegeixGuardia,
         name="aula__horari__afegir_guardia",

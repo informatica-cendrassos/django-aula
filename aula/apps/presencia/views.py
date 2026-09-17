@@ -33,7 +33,7 @@ from django.urls import reverse
 from django.utils.safestring import SafeText
 
 from aula.apps.alumnes.gestioGrups import grupsPotencials
-from aula.apps.alumnes.models import AlumneNomSentit, Grup
+from aula.apps.alumnes.models import Alumne, AlumneNomSentit, Grup
 from aula.apps.assignatures.models import Assignatura
 
 # formularis
@@ -51,6 +51,7 @@ from aula.apps.presencia.forms import (
     ControlAssistenciaFormFake,
     afegeixAlumnesLlistaExpandirForm,
     afegeixGuardiaForm,
+    afegeixTreuAlumnesLlistaByRalcForm,
     afegeixTreuAlumnesLlistaForm,
     alertaAssistenciaForm,
     calculadoraUnitatsFormativesForm,
@@ -1042,6 +1043,108 @@ def treuAlumnesLlista(request, pk):
             "head": head,
             "missatge": """Atenció, no s'esborraran els alumnes que ja s'hagi passat llista o els que tinguin
                                    alguna incidència o expulsió""",
+        },
+    )
+
+
+@login_required
+@group_required(["professors"])
+def afegeixTreuAlumnesLlistaByRalc(request, pk):
+    credentials = getImpersonateUser(request)
+    (user, l4) = credentials
+    impartir = get_object_or_404(Impartir, pk=int(pk))
+
+    pertany_al_professor = user.pk in [
+        impartir.horari.professor.pk,
+        impartir.professor_guardia.pk if impartir.professor_guardia else -1,
+    ]
+    if not (l4 or pertany_al_professor):
+        raise Http404()
+
+    head = "Actualitzar alumnes per RALC"
+    form = afegeixTreuAlumnesLlistaByRalcForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        ralcs = []
+        for linia in form.cleaned_data["ralcs"].splitlines():
+            ralc = linia.strip()
+            if ralc and ralc not in ralcs:
+                ralcs.append(ralc)
+
+        if not ralcs:
+            form.add_error("ralcs", "Cal introduir almenys un RALC.")
+        else:
+            alumnes = []
+            ralcs_no_trobats = []
+            ralcs_duplicats = []
+            ralcs_no_permesos = []
+            grups_a_mostrar = grupsPotencials(impartir.horari)
+            for ralc in ralcs:
+                coincidencies = list(Alumne.objects.filter(ralc=ralc))
+                if not coincidencies:
+                    ralcs_no_trobats.append(ralc)
+                elif len(coincidencies) > 1:
+                    ralcs_duplicats.append(ralc)
+                elif not Alumne.objects.filter(
+                    pk=coincidencies[0].pk, grup__in=grups_a_mostrar
+                ).exists():
+                    ralcs_no_permesos.append(ralc)
+                else:
+                    alumnes.append(coincidencies[0])
+
+            if ralcs_no_trobats or ralcs_duplicats or ralcs_no_permesos:
+                errors = []
+                if ralcs_no_trobats:
+                    errors.append(
+                        "RALC no trobats: {}".format(", ".join(ralcs_no_trobats))
+                    )
+                if ralcs_duplicats:
+                    errors.append(
+                        "RALC duplicats: {}".format(", ".join(ralcs_duplicats))
+                    )
+                if ralcs_no_permesos:
+                    errors.append(
+                        "RALC que no corresponen a alumnes disponibles per "
+                        "a aquest horari: {}".format(", ".join(ralcs_no_permesos))
+                    )
+                form.add_error("ralcs", ". ".join(errors))
+            else:
+                from aula.apps.presencia.afegeixTreuAlumnesLlista import (
+                    afegeixTreuByRalcThread,
+                )
+
+                sincronitza = afegeixTreuByRalcThread(
+                    usuari=user, impartir=impartir, alumnes=alumnes
+                )
+                executaAmbOSenseThread(sincronitza)
+
+                Accio.objects.create(
+                    tipus="LL",
+                    usuari=user,
+                    l4=l4,
+                    impersonated_from=request.user if request.user != user else None,
+                    text=(
+                        "Sincronització per RALC de la classe {0} "
+                        "(retirada forçada, sense expansió): {1}"
+                    ).format(impartir, ", ".join(ralcs) if ralcs else "llista buida"),
+                )
+
+                import time
+
+                while sincronitza and not sincronitza.primerDiaFet():
+                    time.sleep(0.5)
+                return HttpResponseRedirect("/presencia/passaLlista/%s/" % pk)
+
+    return render(
+        request,
+        "formset.html",
+        {
+            "formset": [form],
+            "head": head,
+            "missatge": (
+                "Enganxa un RALC per línia d'un alumne que puguis afegir a "
+                "aquesta hora. L'operació s'aplica a totes les imparticions "
+                "d'aquest horari des de la data d'aquesta impartició."
+            ),
         },
     )
 

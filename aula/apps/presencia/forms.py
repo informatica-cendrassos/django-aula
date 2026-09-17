@@ -184,6 +184,19 @@ class afegeixTreuAlumnesLlistaForm(forms.Form):
         self.fields["alumnes"].queryset = self.queryset
 
 
+class afegeixTreuAlumnesLlistaByRalcForm(forms.Form):
+    ralcs = forms.CharField(
+        label="Codis RALC",
+        widget=forms.Textarea,
+        required=True,
+        help_text=(
+            "Introdueix un RALC per línia, d'un alumne que puguis afegir a "
+            "aquesta hora. La llista s'actualitzarà a totes les imparticions "
+            "d'aquest horari des de la data d'aquesta impartició."
+        ),
+    )
+
+
 class calculadoraUnitatsFormativesForm(forms.Form):
     grup = forms.ModelChoiceField(queryset=None)
     assignatura = forms.ModelMultipleChoiceField(queryset=None)
