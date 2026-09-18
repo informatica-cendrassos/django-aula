@@ -16,6 +16,12 @@ FI_PROCES_TREURE_ALUMNES_AMB_ERRORS = "Fi procés treure alumnes a {0} amb error
 
 FI_PROCES_AFEGIR_ALUMNES_AMB_ERRORS = """Fi procés afegir alumnes a {0} amb errors"""
 
+FI_PROCES_SINCRONITZAR_ALUMNES_RALC = "Fi procés sincronitzar alumnes per RALC a {0}"
+
+FI_PROCES_SINCRONITZAR_ALUMNES_RALC_AMB_ERRORS = (
+    "Fi procés sincronitzar alumnes per RALC a {0} amb errors"
+)
+
 EXPULSIO_PER_ACUMULACIO_INCIDENCIES = """A l'alumne {0} ja li has posat {1} incidències en els darrers {2} dies. 
                         Segons la normativa del Centre hauries de tramitar 
                         una falta greu per acumulació d'incidències."""
@@ -136,6 +142,8 @@ MISSATGES = {
             PASSAR_LLISTA_GRUP_NO_MEU,
             FI_PROCES_AFEGIR_ALUMNES,
             FI_PROCES_AFEGIR_ALUMNES_AMB_ERRORS,
+            FI_PROCES_SINCRONITZAR_ALUMNES_RALC,
+            FI_PROCES_SINCRONITZAR_ALUMNES_RALC_AMB_ERRORS,
             HAN_PASSAT_LLISTA_PER_MI,
             ERROR_AL_PROGRAMA,
             ACUS_REBUT_ERROR_AL_PROGRAMA,

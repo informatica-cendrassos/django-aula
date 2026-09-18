@@ -337,8 +337,9 @@
       </div>
     	
     	<div class="col-sm-4 hidden-xs">
-			  <p><a href="/presencia/treuAlumnesLlista/{{id_impartir}}">Treure alumnes de la llista</a></p>
-			  <p><a href="/presencia/afegeixAlumnesLlista/{{id_impartir}}">Afegir alumnes a la llista</a></p>
+		  <p><a href="/presencia/treuAlumnesLlista/{{id_impartir}}">Treure alumnes de la llista</a></p>
+		  <p><a href="/presencia/afegeixAlumnesLlista/{{id_impartir}}">Afegir alumnes a la llista</a></p>
+		  <p><a href="/presencia/afegeixTreuAlumnesLlistaByRalc/{{id_impartir}}/">Actualitzar alumnes per RALC</a></p>
 			  {% if permetCopiarDUnaAltreHoraEnabled %}
 			  <p><a href="/presencia/copiarAlumnesLlista/{{id_impartir}}" >Copiar alumnes d'una altra hora</a></p>
 			  {% endif %}
@@ -398,6 +399,7 @@
 	          <ul class="dropdown-menu">
 	              <li><a href="/presencia/treuAlumnesLlista/{{id_impartir}}" >Treure alumnes</a></li>
 	              <li><a href="/presencia/afegeixAlumnesLlista/{{id_impartir}}" >Afegir alumnes</a></li>
+	              <li><a href="/presencia/afegeixTreuAlumnesLlistaByRalc/{{id_impartir}}/" >Actualitzar alumnes per RALC</a></li>
 	              <li><a href="/incidencies/posaIncidenciaAula/{{id_impartir}}" >Incidències</a></li>
 	              <li>
 	                <a href="/baixes/feina/{{id_impartir}}" >Feina a Realitzar
@@ -419,6 +421,9 @@
 	  <p>
 			<a href="/presencia/afegeixAlumnesLlista/{{id_impartir}}">Afegir alumnes a la llista</a>
 		</p>
+	  <p>
+			<a href="/presencia/afegeixTreuAlumnesLlistaByRalc/{{id_impartir}}/">Actualitzar alumnes per RALC</a>
+		</p>
 			
 		{% if pot_marcar_sense_alumnes %}
 			<p>
@@ -434,5 +439,3 @@
 {% block postform  %}
 
 {% endblock %}
-
-
