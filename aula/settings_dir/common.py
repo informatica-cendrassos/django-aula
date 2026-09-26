@@ -299,6 +299,9 @@ LOGGING = {
         },
     },
     "handlers": {
+        "null": {
+            "class": "logging.NullHandler",
+        },
         "mail_admins": {
             "level": "ERROR",
             "filters": [
@@ -313,6 +316,11 @@ LOGGING = {
             "handlers": ["mail_admins"],
             "level": "ERROR",
             "propagate": True,
+        },
+        "django.security.DisallowedHost": {
+            "handlers": ["null"],
+            "level": "ERROR",
+            "propagate": False,
         },
     },
 }
