@@ -38,6 +38,16 @@
             {% endif %}
           {% endif %}
 
+          {% if dades_addicionals_alumne %}
+              <span class="glyphicon glyphicon-info-sign"> </span>
+              {% with visible_dades_addicionals=dades_addicionals_alumne|dictsort:"label" %}
+                  {% for dada in visible_dades_addicionals %}
+                      {% if dada.value and dada.value != '' %}
+                          {% if not forloop.first %}, {% endif %}{{ dada.label }}: {{ dada.value }}
+                      {% endif %}
+                  {% endfor %}
+              {% endwith %}
+          {% endif %}
 
       	</p>
           </div>

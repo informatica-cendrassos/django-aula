@@ -1013,6 +1013,25 @@ def detallAlumneHorari(request, pk, detall="all"):
     except ValueError:
         data = datetime.today()
 
+
+
+    dades_addicionals_alumne = []
+    if CUSTOM_DADES_ADDICIONALS_ALUMNE:
+        labels = [x["label"] for x in CUSTOM_DADES_ADDICIONALS_ALUMNE]
+        for item in CUSTOM_DADES_ADDICIONALS_ALUMNE:
+            label = item.get("label")
+            if not label or label not in labels:
+                continue
+            dada = DadesAddicionalsAlumne.objects.filter(alumne=alumne, label=label).first()
+            if not dada:
+                continue
+            visibilitat = item.get("visibilitat", [])
+            if visibilitat and (
+                user.groups.filter(name__in=["direcció", "consergeria"]).exists()
+                or es_tutor_de_lalumne
+            ):
+                dades_addicionals_alumne.append({"label": dada.label, "value": dada.value})
+
     qAvui = Q(impartir__dia_impartir=data)
     controlOnEslAlumneAvui = alumne.controlassistencia_set.filter(qAvui)
 
@@ -1143,6 +1162,7 @@ def detallAlumneHorari(request, pk, detall="all"):
             "ruta_fotos": settings.PRIVATE_STORAGE_ROOT,
             "es_professor": es_alumne_del_profe,
             "documents": documents,
+            "dades_addicionals_alumne": dades_addicionals_alumne,
         },
     )
 
