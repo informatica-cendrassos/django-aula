@@ -299,27 +299,15 @@ def elsProfessors(request):
         camp.enllac = None
         qProfessor = Q(horari__professor=professor)
 
-        qAvui = Q(dia_impartir=datetime.today()) & Q(
-            horari__hora__hora_fi__lt=datetime.now()
-        )
-        qFinsAhir = Q(dia_impartir__lt=datetime.today())
-        qFinsAra = qFinsAhir | qAvui
+        qFinsAra = Q(dia_impartir__lt=datetime.today())
         qTeGrup = Q(horari__grup__isnull=False)
-        imparticions = Impartir.objects.filter(qProfessor & qFinsAra & qTeGrup).exclude(
-            pot_no_tenir_alumnes=True
-        )
-        nImparticios = (
-            imparticions.values_list(
-                "dia_impartir", "horari__dia_de_la_setmana_id", "horari__hora_id"
-            )
-            .distinct()
-            .count()
-        )
+        imparticions = Impartir.objects.filter(qProfessor & qFinsAra & qTeGrup)
+        nImparticios = imparticions.count()
+        qSenseAlumnes = Q(controlassistencia__isnull=True)
+        qProfeHaPassatLlista = Q(professor_passa_llista__isnull=False)
         nImparticionsLlistaPassada = (
-            imparticions.filter(professor_passa_llista__isnull=False)
-            .values_list(
-                "dia_impartir", "horari__dia_de_la_setmana_id", "horari__hora_id"
-            )
+            imparticions.filter(qProfeHaPassatLlista | qSenseAlumnes)
+            .order_by()
             .distinct()
             .count()
         )
