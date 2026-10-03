@@ -9,6 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from aula.apps.alumnes.models import Alumne
+from aula.apps.avaluacioQualitativa.pdf import genera_pdf_qualitativa
 from aula.apps.presencia.models import ControlAssistencia, EstatControlAssistencia
 from aula.apps.sortides.models import (
     NotificaSortida,
@@ -322,6 +323,16 @@ def alumnes_dades(request, format=None, alumne_id=None):
         ),
     }
     return Response(content)
+
+
+@api_view(["GET"])
+@permission_classes((EsUsuariDeLaAPI,))
+def qualitativa_pdf(request, format=None, alumne_id=None):
+    professor, responsable, alumne = getRol(request.user, request)
+    alumne = obte_alumne_o_error(alumne_id)
+    valida_acces_responsable_alumne(responsable, alumne)
+
+    return genera_pdf_qualitativa(alumne, request=request)
 
 
 @api_view(["GET"])

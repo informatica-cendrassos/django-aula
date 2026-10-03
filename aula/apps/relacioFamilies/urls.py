@@ -34,6 +34,11 @@ urlpatterns = [
         name="relacio_families__informe__el_meu_informe",
     ),
     re_path(
+        r"^qualitativaPdf/(?P<pk>\d+)/$",
+        relacioFamilies_views.qualitativaPdf,
+        name="relacio_families__qualitativa__pdf",
+    ),
+    re_path(
         r"^canviParametres/$",
         relacioFamilies_views.canviParametres,
         name="relacio_families__configuracio__canvi_parametres",
