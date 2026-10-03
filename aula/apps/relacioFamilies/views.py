@@ -31,6 +31,7 @@ from aula.apps.alumnes.tools import get_hores, properdiaclasse, ultimdiaclasse
 
 # helpers
 from aula.apps.avaluacioQualitativa.models import RespostaAvaluacioQualitativa
+from aula.apps.avaluacioQualitativa.pdf import genera_pdf_qualitativa
 from aula.apps.incidencies.models import Expulsio, Incidencia, Sancio
 from aula.apps.matricula.viewshelper import inforgpd
 from aula.apps.missatgeria.models import Missatge
@@ -589,6 +590,30 @@ def dadesRelacioFamilies(request):
             "head": "Els meus alumnes tutorats",
         },
     )
+
+
+@login_required
+def qualitativaPdf(request, pk=None):
+    credentials = tools.getImpersonateUser(request)
+    (user, l4) = credentials
+
+    professor, responsable, alumne = getRol(user, request)
+
+    if pk:
+        alumne = get_object_or_404(Alumne, pk=int(pk))
+        if professor and professor not in alumne.tutorsDeLAlumne():
+            raise Http404
+        if responsable and alumne not in responsable.get_alumnes_associats():
+            raise Http404
+        if not professor and not responsable and alumne != User2Alumne(user):
+            raise Http404
+
+    if not alumne:
+        if responsable:
+            return HttpResponseRedirect("/open/escollirAlumne/")
+        raise Http404
+
+    return genera_pdf_qualitativa(alumne, request=request)
 
 
 # --------------------------------------------------------------------------------------------------------
@@ -2163,6 +2188,7 @@ def elMeuInforme(request, pk=None):
             "report": report,
             "head": "Informació alumne {0}".format(head),
             "assistencia_calendari": json.dumps(assistencia_calendari),
+            "qualitativa_pdf_url": None,
         },
     )
 
