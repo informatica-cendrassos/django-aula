@@ -35,6 +35,11 @@ urlpatterns = [
         mblapp_views.qualitativa_pdf,
         name="appmobil__api__qualitativa_pdf",
     ),
+    re_path(
+        r"^alumnes/qualitativa_visible/(?P<alumne_id>\d+)/$",
+        mblapp_views.qualitativa_visible,
+        name="appmobil__api__qualitativa_visible",
+    ),
     re_path(r"^sortides/(?P<alumne_id>\d+)/$", mblapp_views.sortides, name="appmobil__api__sortides"),
     re_path(
         r"^sortides/(?P<pk>\d+)/(?P<alumne_id>\d+)/$",
