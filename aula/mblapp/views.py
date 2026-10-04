@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
 from __future__ import unicode_literals
 
-from datetime import datetime
+from datetime import date, datetime
 
 from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
@@ -333,6 +333,24 @@ def qualitativa_pdf(request, format=None, alumne_id=None):
     valida_acces_responsable_alumne(responsable, alumne)
 
     return genera_pdf_qualitativa(alumne, request=request)
+
+
+@api_view(["GET"])
+@permission_classes((EsUsuariDeLaAPI,))
+def qualitativa_visible(request, format=None, alumne_id=None):
+    professor, responsable, alumne = getRol(request.user, request)
+    alumne = obte_alumne_o_error(alumne_id)
+    valida_acces_responsable_alumne(responsable, alumne)
+
+    avui = date.today()
+    visible = alumne.respostaavaluacioqualitativa_set.filter(
+        qualitativa__data_obrir_portal_families__isnull=False,
+        qualitativa__data_tancar_tancar_portal_families__isnull=False,
+        qualitativa__data_obrir_portal_families__lte=avui,
+        qualitativa__data_tancar_tancar_portal_families__gte=avui,
+    ).exists()
+
+    return Response({"resultat": "Sí" if visible else "No"})
 
 
 @api_view(["GET"])
