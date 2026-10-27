@@ -18,6 +18,11 @@ urlpatterns = [
         relacioFamilies_views.configuraConnexio,
         name="tutoria__relacio_families___configura_connexio",
     ),
+    path(
+        "correuAlumnesPortalPerIdalu/",
+        relacioFamilies_views.correuAlumnesPortalPerIdalu,
+        name="tutoria__correu_alumnes_portal__per_idalu",
+    ),
     re_path(
         r"^bloquejaDesbloqueja/(?P<pk>\d+)/$",
         relacioFamilies_views.bloquejaDesbloqueja,

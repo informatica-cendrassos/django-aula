@@ -174,6 +174,13 @@ def calcula_menu(user, path, sessioImpersonada, request):
         ("Assistència", "tutoria__assistencia__list_entre_dates", tu, None, None),
         ("Informe", "tutoria__alumne__informe_setmanal", tu, None, None),
         ("Portal", "tutoria__relacio_families__dades_relacio_families", tu, None, None),
+        (
+            "Correu alumnes portal x IDALU",
+            "tutoria__correu_alumnes_portal__per_idalu",
+            tu,
+            None,
+            None,
+        ),
         ("Seguiment", "tutoria__seguiment_tutorial__formulari", tu, None, None),
         ("Codis AruCo", "tutoria__aruco__imprimir", tu_aruco, None, None),
     )

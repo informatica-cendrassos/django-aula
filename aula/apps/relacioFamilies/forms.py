@@ -1,3 +1,4 @@
+import csv
 import io
 import os
 
@@ -7,8 +8,108 @@ from PIL import Image
 
 from aula.apps.alumnes.models import Alumne
 from aula.apps.relacioFamilies.models import Responsable
+from aula.apps.relacioFamilies.permissions import alumnes_portal
+from aula.apps.usuaris.tools import testEmail
 from aula.settings import CUSTOM_TIPUS_MIME_FOTOS
 from aula.utils.widgets import DataHoresAlumneAjax
+
+
+class CorreuAlumnesPortalForm(forms.Form):
+    dades = forms.CharField(
+        label="IDALU (RALC) i email",
+        strip=False,
+        widget=forms.Textarea(attrs={"rows": 16, "class": "form-control"}),
+        help_text=(
+            "Enganxa les dues columnes d'Excel, en aquest ordre: IDALU (RALC) i email. "
+            "La primera fila pot contenir les capçaleres."
+        ),
+    )
+
+    def __init__(self, professor, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.professor = professor
+
+    def clean_dades(self):
+        dades = self.cleaned_data["dades"]
+        errors = []
+        files = []
+        vistos = set()
+        primera = True
+        email_field = forms.EmailField(
+            max_length=Alumne._meta.get_field("correu").max_length
+        )
+        reader = csv.reader(io.StringIO(dades), delimiter="\t", strict=True)
+        try:
+            for columnes in reader:
+                fila = reader.line_num
+                if not any(c.strip() for c in columnes):
+                    continue
+                columnes = [c.strip() for c in columnes]
+                if primera and len(columnes) == 2:
+                    id_cap, email_cap = [c.casefold() for c in columnes]
+                    primera = False
+                    if id_cap in {"idalu", "ralc", "idalu (ralc)"} and email_cap in {
+                        "email",
+                        "mail",
+                        "e-mail",
+                        "correu",
+                        "correu electrònic",
+                    }:
+                        continue
+                primera = False
+                if len(columnes) != 2:
+                    errors.append(f"Fila {fila}: calen exactament dues columnes.")
+                    continue
+                ralc, correu = columnes
+                if not ralc:
+                    errors.append(f"Fila {fila}: falta l'IDALU (RALC).")
+                    continue
+                if ralc in vistos:
+                    errors.append(f"Fila {fila}: IDALU (RALC) {ralc} repetit.")
+                    continue
+                vistos.add(ralc)
+                try:
+                    correu = email_field.clean(correu)
+                except forms.ValidationError:
+                    errors.append(f"Fila {fila}: cal un email vàlid i no buit.")
+                    continue
+                files.append((fila, ralc, correu))
+        except csv.Error:
+            errors.append(f"Fila {reader.line_num}: format de les columnes incorrecte.")
+
+        alumnes = {}
+        for alumne in alumnes_portal(self.professor).filter(
+            ralc__in=[ralc for _, ralc, _ in files]
+        ):
+            alumnes.setdefault(alumne.ralc, []).append(alumne)
+
+        correus_validats = {}
+        actualitzacions = []
+        for fila, ralc, correu in files:
+            coincidencies = alumnes.get(ralc, [])
+            if not coincidencies:
+                errors.append(
+                    f"Fila {fila}: IDALU (RALC) {ralc} no trobat entre els alumnes "
+                    "que pots gestionar a Tutoria / Portal."
+                )
+                continue
+            if len(coincidencies) != 1:
+                errors.append(
+                    f"Fila {fila}: IDALU (RALC) {ralc} correspon a més d'un alumne."
+                )
+                continue
+            if correu not in correus_validats:
+                correus_validats[correu] = testEmail(correu, False)[0] >= -1
+            if not correus_validats[correu]:
+                errors.append(f"Fila {fila}: adreça de correu o domini no vàlid.")
+                continue
+            actualitzacions.append((coincidencies[0], correu))
+
+        if not files and not errors:
+            errors.append("Enganxa almenys una fila amb IDALU (RALC) i email.")
+        if errors:
+            raise forms.ValidationError(errors)
+        return actualitzacions
 
 
 def tipusFotoOK(foto):

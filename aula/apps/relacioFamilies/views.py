@@ -9,6 +9,7 @@ from django.contrib import messages
 # auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.humanize.templatetags.humanize import naturalday
+from django.db import transaction
 from django.db.models import Q
 
 # templates
@@ -38,11 +39,13 @@ from aula.apps.missatgeria.models import Missatge
 from aula.apps.presencia.models import ControlAssistencia
 from aula.apps.relacioFamilies.forms import (
     AlumneModelForm,
+    CorreuAlumnesPortalForm,
     ResponsableModelForm,
     comunicatForm,
     escollirAlumneForm,
 )
 from aula.apps.relacioFamilies.models import Responsable
+from aula.apps.relacioFamilies.permissions import alumnes_portal
 from aula.apps.sortides.models import (
     NotificaSortida,
     QuotaPagament,
@@ -201,7 +204,7 @@ def configuraConnexio(request, pk):
     alumne = Alumne.objects.get(pk=int(pk))
 
     # seg-------------------
-    te_permis = l4 or professor in alumne.tutorsDeLAlumne()
+    te_permis = l4 or alumnes_portal(professor).filter(pk=alumne.pk).exists()
     if not te_permis:
         raise Http404()
 
@@ -336,11 +339,43 @@ def configuraConnexio(request, pk):
 
 @login_required
 @group_required(["professors"])
+def correuAlumnesPortalPerIdalu(request):
+    user, _ = tools.getImpersonateUser(request)
+    professor = User2Professor(user)
+    if professor is None:
+        raise Http404()
+
+    form = CorreuAlumnesPortalForm(
+        professor, request.POST if request.method == "POST" else None
+    )
+    if request.method == "POST" and form.is_valid():
+        actualitzacions = form.cleaned_data["dades"]
+        with transaction.atomic():
+            for alumne, correu in actualitzacions:
+                alumne.correu = correu
+                alumne.save(update_fields=["correu"])
+        messages.success(
+            request, f"S'ha desat el correu de {len(actualitzacions)} alumnes."
+        )
+        return HttpResponseRedirect(
+            reverse_lazy("tutoria__correu_alumnes_portal__per_idalu")
+        )
+
+    return render(
+        request,
+        "correuAlumnesPortalPerIdalu.html",
+        {"form": form, "head": "Correu alumnes portal x IDALU"},
+    )
+
+
+@login_required
+@group_required(["professors"])
 def dadesRelacioFamilies(request):
     credentials = tools.getImpersonateUser(request)
     (user, _) = credentials
 
     professor = User2Professor(user)
+    alumnes_visibles = alumnes_portal(professor)
 
     report = []
     grups = [t.grup for t in Tutor.objects.filter(professor=professor)]
@@ -388,7 +423,7 @@ def dadesRelacioFamilies(request):
         else:
             consulta_alumnes = Q(grup=grup)
 
-        alumnes = Alumne.objects.filter(consulta_alumnes)
+        alumnes = alumnes_visibles.filter(consulta_alumnes)
 
         familia_pendent_de_mirar_models = [
             (
