@@ -2,7 +2,16 @@ Llicència:
 
     This file is part of django-aula ('djAu').
 
-    Copyright © 2011–TODAY Dani Herrera ctrl.alt.d@gmail.com (Institut Cendrassos - Figueres)
+    Copyright © 2011–2026 Dani Herrera ctrl.alt.d@gmail.com (Institut Cendrassos - Figueres)
+
+    El projecte original django-aula ('djAu') es va deixar de mantenir el
+    juny de 2026.
+
+    Aquest repositori és un fork d'aquell projecte, creat per l'Institut
+    Cendrassos el 2026 i actiu des de llavors, amb modificacions
+    respecte del programa original:
+
+    Copyright © 2026–TODAY Juaky Rubio jrubio34@xtec.cat (Institut Sabadell - Sabadell)
     
     Aquest copyright forma part del programa, no es pot alterar, 
     i ha d'acompanyar el programa de manera visible. 

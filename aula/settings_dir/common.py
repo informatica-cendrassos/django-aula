@@ -27,7 +27,7 @@ def location(x):
     return os.path.join(PROJECT_DIR, x)
 
 
-ADMINS = (("dani Herrera", "ctrl.alt.d@gmail.com"),)
+ADMINS = (("Juaky Rubio", "jrubio34@xtec.cat"),)
 
 LOGIN_URL = "/usuaris/login/"
 
