@@ -166,6 +166,40 @@
         $("#clean-status-error").hide();
       }
 
+      function portaFocusAIniciPerErrorNeteja() {
+        // El missatge és a la part superior; forcem desplaçament i focus perquè sigui visible.
+        window.scrollTo(0, 0);
+        var $error = $("#clean-status-error");
+        $error.attr("tabindex", "-1").focus();
+      }
+
+      var alumnesAmbErrorPresencia = [
+        {% for f in formset %}
+          {% if f.prefix and f.estat.errors %}
+            {{ f.prefix }},
+          {% endif %}
+        {% endfor %}
+      ];
+
+      function portaFocusAlPrimerAlumneAmbErrorPresencia() {
+        if (!alumnesAmbErrorPresencia.length) {
+          return;
+        }
+
+        var prefix = alumnesAmbErrorPresencia[0];
+        var $desti = $("#label_id_" + prefix + "-estat_0");
+
+        if (!$desti.length) {
+          $desti = $("#rad_id_" + prefix + "-estat_0");
+        }
+
+        if ($desti.length) {
+          var top = Math.max($desti.offset().top - 120, 0);
+          $("html, body").scrollTop(top);
+          $desti.attr("tabindex", "-1").focus();
+        }
+      }
+
       $(document).ready(function(){
           garanteixCampNeteja();
 
@@ -182,10 +216,12 @@
             if (!$("#id_estat_neteja_aula").val()) {
               e.preventDefault();
               $("#clean-status-error").show();
+              portaFocusAIniciPerErrorNeteja();
             }
           });
 
           tutor();
+          portaFocusAlPrimerAlumneAmbErrorPresencia();
         });
 
       $(document).ready(
@@ -329,7 +365,7 @@
               <span class="cara-neteja cara-neteja-bruta"><span class="boca"></span></span>
             </button>
           </div>
-          <div id="clean-status-error" class="alert alert-danger" style="display:none; margin-top:10px;">
+          <div id="clean-status-error" class="alert alert-danger" role="alert" style="display:none; margin-top:10px;">
             Cal seleccionar una cara per indicar l'estat de neteja de l'aula.
           </div>
         </div>
