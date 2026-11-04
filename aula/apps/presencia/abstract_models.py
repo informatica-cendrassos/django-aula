@@ -307,9 +307,9 @@ class AbstractControlAssistencia(models.Model):
             text = text + ". " + self.comunicat.text_missatge
         return text
 
-    def set_notificacio(self, notificacio):
+    def set_notificacio(self, notificacio, tipus="N"):
         # Què passa si canvia estat d'un control d'assistència?
-        set_notificacio(self, notificacio)
+        set_notificacio(self, notificacio, tipus=tipus)
 
     def set_revisio(self, revisio):
         set_revisio(self, revisio)

@@ -144,8 +144,8 @@ class AbstractSancio(models.Model):
 
         return resultat
 
-    def set_notificacio(self, notificacio):
-        set_notificacio(self, notificacio)
+    def set_notificacio(self, notificacio, tipus="N"):
+        set_notificacio(self, notificacio, tipus=tipus)
 
     def set_revisio(self, revisio):
         set_revisio(self, revisio)
@@ -280,8 +280,8 @@ class AbstractExpulsio(models.Model):
             self.alumne.expulsio_set.exclude(estat="ES ").filter(es_vigent=True).count()
         )
 
-    def set_notificacio(self, notificacio):
-        set_notificacio(self, notificacio)
+    def set_notificacio(self, notificacio, tipus="N"):
+        set_notificacio(self, notificacio, tipus=tipus)
 
     def set_revisio(self, revisio):
         set_revisio(self, revisio)
@@ -467,8 +467,8 @@ class AbstractIncidencia(models.Model):
             tipus = """({0})""".format(self.tipus)
         return """{0} {1} {2}""".format(tipus, self.alumne, self.descripcio_incidencia)
 
-    def set_notificacio(self, notificacio):
-        set_notificacio(self, notificacio)
+    def set_notificacio(self, notificacio, tipus="N"):
+        set_notificacio(self, notificacio, tipus=tipus)
 
     def set_revisio(self, revisio):
         set_revisio(self, revisio)

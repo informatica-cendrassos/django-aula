@@ -123,8 +123,8 @@ class AbstractRespostaAvaluacioQualitativa(models.Model):
         else:
             return self.frase_oberta
 
-    def set_notificacio(self, notificacio):
-        set_notificacio(self, notificacio)
+    def set_notificacio(self, notificacio, tipus="N"):
+        set_notificacio(self, notificacio, tipus=tipus)
 
     def set_revisio(self, revisio):
         set_revisio(self, revisio)
