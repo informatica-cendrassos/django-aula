@@ -121,13 +121,10 @@ def notifica_pendents():
     connection.close()
 
 
-def getNotifElements(elements, usuari, alumne):
+def getNotifElements(elements, usuari, alumne, tipus="N"):
     """
-    Busca elements que tenen pendent la notificació a aquest usuari i alumne
-    elements  Query amb els elements a comprovar si n'hi ha de nous, és a dir, no notificats.
-    usuari      User
-    alumne    Alumne al que pertanyen els elements
-    Retorna   Query amb els elements no notificats trobats.
+    Busca elements que tenen pendent la notificació a aquest usuari i alumne.
+    tipus       Tipus de notificació que volem consultar (N=correu/portal, M=mòbil).
     """
     # DEPRECATED vvv
     # Per compatibilitat amb dades existents
@@ -137,17 +134,19 @@ def getNotifElements(elements, usuari, alumne):
         pass
     # DEPRECATED ^^^
     Nous = elements.exclude(
-        notificacions_familia__usuari=usuari, notificacions_familia__alumne=alumne
+        notificacions_familia__usuari=usuari,
+        notificacions_familia__alumne=alumne,
+        notificacions_familia__tipus__in=[tipus, "R"],
     )
     return Nous
 
 
-def setNotifElements(elements, notificacio):
+def setNotifElements(elements, notificacio, tipus="N"):
     """
     Registra les notificacions als elements indicats
     """
     for e in elements:
-        e.set_notificacio(notificacio)
+        e.set_notificacio(notificacio, tipus=tipus)
 
 
 def notifica():

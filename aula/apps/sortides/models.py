@@ -647,8 +647,8 @@ class Pagament(models.Model):
             )
         )
 
-    def set_notificacio(self, notificacio):
-        set_notificacio(self, notificacio)
+    def set_notificacio(self, notificacio, tipus="N"):
+        set_notificacio(self, notificacio, tipus=tipus)
 
     def set_revisio(self, revisio):
         set_revisio(self, revisio)
@@ -734,8 +734,8 @@ class NotificaSortida(models.Model):
     def __str__(self):
         return "{} {}".format(self.alumne, self.sortida)
 
-    def set_notificacio(self, notificacio):
-        set_notificacio(self, notificacio)
+    def set_notificacio(self, notificacio, tipus="N"):
+        set_notificacio(self, notificacio, tipus=tipus)
 
     def set_revisio(self, revisio):
         set_revisio(self, revisio)

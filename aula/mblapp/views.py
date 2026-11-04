@@ -257,19 +257,20 @@ def notificacions_news(request, format=None, alumne_id=None):
         ),
         request.user,
         alumne,
+        "M",
     )
     noves_incidencies = getNotifElements(
-        alumne.incidencia_set.all(), request.user, alumne
+        alumne.incidencia_set.all(), request.user, alumne, "M"
     )
     noves_expulsions = getNotifElements(
-        alumne.expulsio_set.exclude(estat="ES"), request.user, alumne
+        alumne.expulsio_set.exclude(estat="ES"), request.user, alumne, "M"
     )
     noves_sancions = getNotifElements(
-        alumne.sancio_set.filter(impres=True), request.user, alumne
+        alumne.sancio_set.filter(impres=True), request.user, alumne, "M"
     )
 
     noves_sortides = getNotifElements(
-        NotificaSortida.objects.filter(alumne=alumne), request.user, alumne
+        NotificaSortida.objects.filter(alumne=alumne), request.user, alumne, "M"
     )
 
     hiHaNovetats = (
@@ -283,12 +284,12 @@ def notificacions_news(request, format=None, alumne_id=None):
     content = {"resultat": "Sí" if hiHaNovetats else "No"}
 
     # Marcar com a notificades les novetats enviades
-    notifAlumne = creaNotifUsuari(request.user, alumne, "N")
-    setNotifElements(noves_faltes_assistencia, notifAlumne)
-    setNotifElements(noves_incidencies, notifAlumne)
-    setNotifElements(noves_expulsions, notifAlumne)
-    setNotifElements(noves_sancions, notifAlumne)
-    setNotifElements(noves_sortides, notifAlumne)
+    notifAlumne = creaNotifUsuari(request.user, alumne, "M")
+    setNotifElements(noves_faltes_assistencia, notifAlumne, "M")
+    setNotifElements(noves_incidencies, notifAlumne, "M")
+    setNotifElements(noves_expulsions, notifAlumne, "M")
+    setNotifElements(noves_sancions, notifAlumne, "M")
+    setNotifElements(noves_sortides, notifAlumne, "M")
 
     return Response(content)
 
