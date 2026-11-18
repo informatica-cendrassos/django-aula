@@ -157,6 +157,24 @@
         if (form.length && !form.find("#id_estat_neteja_aula").length) {
           form.prepend('<input type="hidden" name="estat_neteja_aula" id="id_estat_neteja_aula" value="">');
         }
+        if (form.length && !form.find("#id_observacions_neteja_post").length) {
+          form.append('<input type="hidden" name="observacions_neteja" id="id_observacions_neteja_post" value="">');
+        }
+      }
+
+      function actualitzaObservacionsNeteja() {
+        var value = $("#id_estat_neteja_aula").val();
+        var $wrapper = $("#observacions-neteja-wrapper");
+        var $textarea = $("#id_observacions_neteja");
+        var $error = $("#observacions-neteja-error");
+        var esNoNeta = value === "A" || value === "B";
+        $wrapper.toggle(esNoNeta);
+        $textarea.prop("required", esNoNeta);
+        if (!esNoNeta) {
+          $textarea.val("");
+          $textarea.removeAttr("aria-invalid");
+          $error.hide();
+        }
       }
 
       function estableixSeleccioNeteja(value) {
@@ -164,6 +182,7 @@
         $(".cleanliness-option").removeClass("active");
         $('.cleanliness-option[data-value="' + value + '"]').addClass("active");
         $("#clean-status-error").hide();
+        actualitzaObservacionsNeteja();
       }
 
       function portaFocusAIniciPerErrorNeteja() {
@@ -171,6 +190,24 @@
         window.scrollTo(0, 0);
         var $error = $("#clean-status-error");
         $error.attr("tabindex", "-1").focus();
+      }
+
+      function mostraErrorObservacionsNeteja() {
+        var $wrapper = $("#observacions-neteja-wrapper");
+        var $textarea = $("#id_observacions_neteja");
+        var $error = $("#observacions-neteja-error");
+
+        $wrapper.show();
+        $textarea.prop("required", true);
+        $textarea.attr("aria-invalid", "true");
+        $error.show().attr("tabindex", "-1").focus();
+
+        var wrapperTop = $wrapper.offset().top;
+        window.scrollTo(0, Math.max(wrapperTop - 40, 0));
+      }
+
+      function sincronitzaObservacionsNeteja() {
+        $("#id_observacions_neteja_post").val($("#id_observacions_neteja").val());
       }
 
       var alumnesAmbErrorPresencia = [
@@ -204,21 +241,45 @@
           garanteixCampNeteja();
 
           var selectedStatus = "{{ estat_neteja_aula_seleccionat|default_if_none:'' }}";
+          var observacionsSeleccionades = "{{ observacions_neteja_seleccionades|default:''|escapejs }}";
+          if (observacionsSeleccionades) {
+            $("#id_observacions_neteja").val(observacionsSeleccionades);
+          }
           if (selectedStatus) {
             estableixSeleccioNeteja(selectedStatus);
           }
+
+          {% if observacions_neteja_error %}
+          mostraErrorObservacionsNeteja();
+          {% endif %}
 
           $(".cleanliness-option").on("click", function(){
             estableixSeleccioNeteja($(this).data("value"));
           });
 
+          $("#id_observacions_neteja").on("input", function(){
+            sincronitzaObservacionsNeteja();
+            if ($(this).val().trim()) {
+              $(this).removeAttr("aria-invalid");
+              $("#observacions-neteja-error").hide();
+            }
+          });
+
           $("form").on("submit", function(e){
+            sincronitzaObservacionsNeteja();
             if (!$("#id_estat_neteja_aula").val()) {
               e.preventDefault();
               $("#clean-status-error").show();
               portaFocusAIniciPerErrorNeteja();
+              return;
+            }
+            if ($("#id_estat_neteja_aula").val() !== "N" && !$("#id_observacions_neteja").val().trim()) {
+              e.preventDefault();
+              mostraErrorObservacionsNeteja();
             }
           });
+
+          actualitzaObservacionsNeteja();
 
           tutor();
           portaFocusAlPrimerAlumneAmbErrorPresencia();
@@ -367,6 +428,12 @@
           </div>
           <div id="clean-status-error" class="alert alert-danger" role="alert" style="display:none; margin-top:10px;">
             Cal seleccionar una cara per indicar l'estat de neteja de l'aula.
+          </div>
+          <div id="observacions-neteja-wrapper" class="form-group" style="margin-top:10px; display:none;">
+            <textarea name="observacions_neteja" id="id_observacions_neteja" class="form-control" rows="3" placeholder="Explica per què l'estat de l'aula no és correcte." aria-describedby="observacions-neteja-error"></textarea>
+            <div id="observacions-neteja-error" class="help-block" role="alert" style="display:none; color:#a94442;">
+              És obligatori indicar el motiu pel qual l'estat no és correcte.
+            </div>
           </div>
         </div>
 

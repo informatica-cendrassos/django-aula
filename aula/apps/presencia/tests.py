@@ -1,9 +1,10 @@
 # encoding: utf-8
 import re
 
-from django.test import Client, TestCase
+from django.test import Client, SimpleTestCase, TestCase
 from selenium import webdriver
 
+from aula.apps.presencia.forms import NetejaAulaForm
 from aula.apps.presencia.models import ControlAssistencia
 from aula.apps.presencia.test.testDBCreator import TestDBCreator
 from aula.utils.testing.tests import SeleniumLiveServerTestCase
@@ -75,6 +76,37 @@ class SimpleTest(TestCase):
             coincidencia = str(match)[6:-1]
             valorsAEnviar[coincidencia] = self.db.estats["p"].pk
         return valorsAEnviar
+
+    def test_neteja_aula_neta_amb_observacions_buides_ok(self):
+        form = NetejaAulaForm({"estat_neteja_aula": "N", "observacions_neteja": "   "})
+        self.assertTrue(form.is_valid())
+
+    def test_neteja_aula_bruta_sense_observacions_falla(self):
+        form = NetejaAulaForm({"estat_neteja_aula": "B", "observacions_neteja": "   "})
+        self.assertFalse(form.is_valid())
+        self.assertIn("observacions_neteja", form.errors)
+
+    def test_neteja_aula_bruta_amb_observacions_ok(self):
+        form = NetejaAulaForm(
+            {"estat_neteja_aula": "B", "observacions_neteja": "Hi ha papers a terra."}
+        )
+        self.assertTrue(form.is_valid())
+
+    def test_recupera_observacions_neteja_en_tornar_a_imparticio(self):
+        c = Client()
+        c.post(
+            self.url + "/usuaris/login/",
+            {"usuari": "SrProgramador", "paraulaDePas": "patata"},
+        )
+
+        impartir = self.db.programacioDiaAnterior
+        impartir.estat_neteja_aula = "A"
+        impartir.comentariImpartir = "Comentari guardat de prova"
+        impartir.save()
+
+        response = c.get(self.url + "/presencia/passaLlista/" + str(impartir.pk) + "/")
+
+        self.assertContains(response, 'var observacionsSeleccionades = "Comentari guardat de prova";')
 
 
 class MySeleniumTests(SeleniumLiveServerTestCase):
@@ -336,3 +368,94 @@ class MySeleniumTests(SeleniumLiveServerTestCase):
                 """
         )
         self.selenium.execute_script(js)
+
+    def test_observacions_ocultes_i_js_funciona(self):
+        c = Client()
+        response = c.post(
+            self.url + "/usuaris/login/",
+            {"usuari": "SrProgramador", "paraulaDePas": "patata"},
+        )
+        response = c.get(
+            self.url
+            + "/presencia/passaLlista/"
+            + str(self.db.programacioDiaAnterior.pk)
+            + "/"
+        )
+        c: bytes = response.content
+
+        # Comprovar que les observacions estan ocultes.
+        self.assertTrue(
+            b"style=\"display: none;\"" in c,
+            "Error les observacions haurien d'estar ocultes i no ho estan.",
+        )
+
+        # Comprovar que el javascript funciona.
+        self.assertTrue(
+            b"onchange=\"javascript:canviaEstat(this);\"" in c,
+            "Error no s'ha trobat el javascript que canvia l'estat.",
+        )
+
+        # Comprovar que els estats N, A i B es diferencien correctament.
+        estats = ["N", "A", "B"]
+        for estat in estats:
+            self.assertTrue(
+                bytes(estat) in c,
+                "Error no s'ha trobat l'estat " + estat + " a la plantilla.",
+            )
+
+
+class NetejaAulaTemplateTestCase(SimpleTestCase):
+    def test_observacions_hidden_until_dirty_status_selected(self):
+        template_path = (
+            __import__("pathlib").Path(__file__).parent
+            / "templates"
+            / "passaLlista.html"
+        )
+        with template_path.open(encoding="utf-8") as template_file:
+            template_source = template_file.read()
+
+        self.assertIn(
+            'id="observacions-neteja-wrapper" class="form-group"',
+            template_source,
+        )
+        self.assertIn(
+            'style="margin-top:10px; display:none;"',
+            template_source,
+        )
+        self.assertIn('var esNoNeta = value === "A" || value === "B";', template_source)
+        self.assertIn('$wrapper.toggle(esNoNeta);', template_source)
+        self.assertIn('id_observacions_neteja_post', template_source)
+        self.assertIn('sincronitzaObservacionsNeteja();', template_source)
+
+    def test_aula_acceptable_sense_observacions_falla(self):
+        form = NetejaAulaForm(
+            {"estat_neteja_aula": "A", "observacions_neteja": "   "}
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("observacions_neteja", form.errors)
+
+    def test_views_recupera_observacions_guardades_al_context(self):
+        views_path = __import__("pathlib").Path(__file__).parent / "views.py"
+        with views_path.open(encoding="utf-8") as views_file:
+            views_source = views_file.read()
+
+        self.assertIn('else impartir.comentariImpartir', views_source)
+
+    def test_views_guarda_observacions_neteja_nomest_per_a_i_b(self):
+        views_path = __import__("pathlib").Path(__file__).parent / "views.py"
+        with views_path.open(encoding="utf-8") as views_file:
+            views_source = views_file.read()
+
+        self.assertIn(
+            'observacions_neteja if estat_neteja_aula in ["A", "B"] else ""',
+            views_source,
+        )
+
+    def test_aula_acceptable_amb_observacions_ok(self):
+        form = NetejaAulaForm(
+            {
+                "estat_neteja_aula": "A",
+                "observacions_neteja": "S'han deixat objectes sobre la taula.",
+            }
+        )
+        self.assertTrue(form.is_valid())
