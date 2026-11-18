@@ -49,6 +49,7 @@ from aula.apps.presencia.business_rules.impartir import (
 from aula.apps.presencia.forms import (
     ControlAssistenciaForm,
     ControlAssistenciaFormFake,
+    NetejaAulaForm,
     afegeixAlumnesLlistaExpandirForm,
     afegeixGuardiaForm,
     afegeixTreuAlumnesLlistaByRalcForm,
@@ -393,9 +394,12 @@ def passaLlista(request, pk):
         formset.append(form0)
 
         estat_neteja_aula = request.POST.get("estat_neteja_aula", "").strip()
+        observacions_neteja = request.POST.get("observacions_neteja", "").strip()
+        neteja_form = NetejaAulaForm(request.POST)
         valors_neteja_valids = [
             codi for codi, _ in Impartir.ESTAT_NETEJA_AULA_CHOICES
         ]
+
         if estat_neteja_aula not in valors_neteja_valids:
             totBe = False
             if form0._errors is None:
@@ -403,6 +407,23 @@ def passaLlista(request, pk):
             form0._errors.setdefault(NON_FIELD_ERRORS, []).append(
                 "Cal indicar l'estat de neteja de l'aula abans d'enviar la llista."
             )
+
+        if estat_neteja_aula and estat_neteja_aula != "N":
+            if not observacions_neteja or not observacions_neteja.strip():
+                totBe = False
+                if form0._errors is None:
+                    form0._errors = ErrorDict()
+                form0._errors.setdefault(NON_FIELD_ERRORS, []).append(
+                    "És obligatori indicar el motiu pel qual l'aula no està neta."
+                )
+
+        if not neteja_form.is_valid() and estat_neteja_aula:
+            non_field_errors = neteja_form.non_field_errors()
+            if non_field_errors:
+                totBe = False
+                if form0._errors is None:
+                    form0._errors = ErrorDict()
+                form0._errors.setdefault(NON_FIELD_ERRORS, []).extend(non_field_errors)
 
         for control_a in impartir.controlassistencia_set.order_by(
             *settings.CUSTOM_ORDER_PRESENCIA
@@ -451,6 +472,9 @@ def passaLlista(request, pk):
             impartir.dia_passa_llista = datetime.now()
             impartir.professor_passa_llista = User2Professor(request.user)
             impartir.estat_neteja_aula = estat_neteja_aula
+            impartir.comentariImpartir = (
+                observacions_neteja if estat_neteja_aula in ["A", "B"] else ""
+            )
             impartir.currentUser = user
 
             try:
@@ -556,6 +580,16 @@ def passaLlista(request, pk):
                 request.POST.get("estat_neteja_aula", impartir.estat_neteja_aula)
                 if request.method == "POST"
                 else impartir.estat_neteja_aula
+            ),
+            "observacions_neteja_seleccionades": (
+                request.POST.get("observacions_neteja", "")
+                if request.method == "POST"
+                else impartir.comentariImpartir
+            ),
+            "observacions_neteja_error": (
+                request.method == "POST"
+                and request.POST.get("estat_neteja_aula", "") != "N"
+                and not request.POST.get("observacions_neteja", "").strip()
             ),
         },
     )

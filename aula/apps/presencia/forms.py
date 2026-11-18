@@ -8,9 +8,45 @@ from django_select2.forms import ModelSelect2Widget
 
 from aula.apps.alumnes.models import Grup, Nivell
 from aula.apps.horaris.models import FranjaHoraria
-from aula.apps.presencia.models import ControlAssistencia, EstatControlAssistencia
+from aula.apps.presencia.models import (
+    ControlAssistencia,
+    EstatControlAssistencia,
+    Impartir,
+)
 from aula.apps.usuaris.models import Professor
 from aula.utils.widgets import DateTextImput, bootStrapButtonSelect
+
+
+class NetejaAulaForm(forms.Form):
+    estat_neteja_aula = forms.ChoiceField(
+        choices=Impartir.ESTAT_NETEJA_AULA_CHOICES,
+        required=True,
+        label="Estat de neteja de l'aula",
+    )
+    observacions_neteja = forms.CharField(
+        required=False,
+        label="Observacions de neteja",
+        widget=forms.Textarea(
+            attrs={
+                "rows": 3,
+                "placeholder": "Explica per què l'aula no està neta.",
+            }
+        ),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        estat = cleaned_data.get("estat_neteja_aula")
+        observacions = cleaned_data.get("observacions_neteja")
+
+        if estat and estat != "N":
+            if not observacions or not observacions.strip():
+                self.add_error(
+                    "observacions_neteja",
+                    "És obligatori indicar el motiu pel qual l'aula no està neta.",
+                )
+
+        return cleaned_data
 
 
 class ControlAssistenciaForm(ModelForm):
